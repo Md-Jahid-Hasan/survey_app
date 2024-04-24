@@ -24,26 +24,26 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """User create serializer. Recieve data email, name, password and password1(same as password). Override validate
+    """User create serializer. Receive data email, name, password and password1(same as password). Override validate
     method to check if both password are same."""
-    password1 = serializers.CharField(required=True, write_only=True)
+    confirm_password = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = User()
-        fields = ['pk', 'name', 'email', 'password', 'password1']
+        fields = ['pk', 'name', 'email', 'password', 'confirm_password']
         extra_kwargs = {
             'password': {'write_only': True},
             'pk': {'read_only': True}
         }
 
     def validate(self, attrs):
-        if attrs['password1'] != attrs['password']:
+        if attrs['confirm_password'] != attrs['password']:
             raise serializers.ValidationError({'password': "Password Don't match"})
         return attrs
 
     def create(self, validated_data):
         """Remove password1 field because this is not part of model"""
-        validated_data.pop('password1')
-        return super().create(validated_data)
+        validated_data.pop('confirm_password')
+        return User().objects.create_user(**validated_data)
 
 
