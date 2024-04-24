@@ -1,0 +1,26 @@
+   <h1 class="mb-5 text-center">Survey App</h1>
+<div class="d-flex align-items-center">
+    <form class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded" (ngSubmit)="onSubmit()">
+        <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" required id="email" name="email" [(ngModel)]="user_details.email">
+        </div>
+        <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" required id="name" name="name" [(ngModel)]="user_details.name">
+        </div>
+        <div class="col-6">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" required id="password" name="password"
+                   [(ngModel)]="user_details.password">
+        </div>
+        <div class="col-6">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+                   [(ngModel)]="user_details.confirm_password">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Sign in</button>
+        </div>
+    </form>
+</div>
