@@ -25,7 +25,9 @@ export class LoginComponent {
         if (this.user_details.email == "" || this.user_details.password === "")
             alert("Valid Data not provided")
         else{
-            this.userService.userLogin(this.user_details).subscribe(user_data => console.log(user_data),
+            this.userService.userLogin(this.user_details).subscribe(user_data => {
+                    localStorage.setItem('token', user_data.access)
+                },
                 error => console.log(error.error))
         }
     }

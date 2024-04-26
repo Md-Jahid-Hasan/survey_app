@@ -1,0 +1,50 @@
+<div class="d-flex justify-content-end mb-3">
+        <span class="me-2 pt-2">Sort by:</span>
+        <button class="btn btn-secondary me-2">Created At</button>
+        <button class="btn btn-secondary">Started At</button>
+    </div>
+<table class="table table-bordered table-hover table-striped">
+    <thead>
+    <tr>
+        <th scope="col" style="width: 40%;">Survey Name</th>
+        <th scope="col" style="width: 20%;">Start At</th>
+        <th scope="col" style="width: 20%;">Total Time</th>
+        <th scope="col" style="width: 20%;">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let survey of surveys"
+        [class]="survey.is_ended && 'table-danger'">
+        <td>{{ survey.title }}</td>
+        <td>{{ survey.started_at }}</td>
+        <td>{{ parseInt(survey.survey_time) }} minutes</td>
+        <td>
+            <button class="btn btn-primary" [disabled]="survey.is_ended">{{ survey.is_joined ? "Enter" : "Join" }}
+            </button>
+        </td>
+    </tr>
+    <!-- Add more rows as needed -->
+    </tbody>
+</table>
+<nav class="d-flex justify-content-center">
+    <ul class="pagination">
+        <li class="page-item" >
+            <button class="page-link">Previous</button>
+        </li>
+        <li class="page-item">
+            <button class="page-link">1</button>
+        </li>
+        <li class="page-item">
+            <button class="page-link">1</button>
+        </li>
+        <li class="page-item">
+            <button class="page-link">1</button>
+        </li>
+        <li class="page-item">
+            <button class="page-link">1</button>
+        </li>
+        <li class="page-item">
+            <button class="page-link">Next</button>
+        </li>
+    </ul>
+</nav>
