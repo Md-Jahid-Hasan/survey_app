@@ -21,7 +21,7 @@ export class SurveyListComponent implements OnInit {
 
     ngOnInit() {
         if (typeof window !== 'undefined' && window.localStorage) {
-            this.surveyService.getSurvey().subscribe(surveys => this.surveys = surveys,
+            this.surveyService.getAllSurvey().subscribe(surveys => this.surveys = surveys,
                 error => console.log(error))
         }
     }
