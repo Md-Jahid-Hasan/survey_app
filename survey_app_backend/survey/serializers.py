@@ -4,6 +4,8 @@ from survey.models import Survey, Question, Option, Response
 
 
 class OptionSerializer(serializers.ModelSerializer):
+    """Serializer for Option object. A additional field answer will be added to the options which indicate is the
+    option already selected by the user."""
     answer = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -19,6 +21,7 @@ class OptionSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
+    """This is serialized question object. text_answer field will populate with user answer if provided."""
     options = OptionSerializer(many=True, required=False)
     text_answer = serializers.SerializerMethodField(read_only=True)
 
@@ -34,7 +37,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         if response.exists():
             return response.first().text_answer
         else:
-            return False
+            return ""
 
     def create(self, validated_data):
         options = validated_data.pop('options', None)
@@ -46,13 +49,14 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class SurveySerializer(serializers.ModelSerializer):
+    """This serializer is used for return the list of surveys and create new survey object."""
     questions = QuestionSerializer(many=True, write_only=True)
     is_joined = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Survey
-        fields = ['title', 'started_at', 'ended_at', 'created_by', 'is_ended', 'survey_time', 'questions', 'is_joined']
-        read_only_fields = ('is_ended', 'survey_time')
+        fields = ['title', 'started_at', 'ended_at', 'created_by', 'is_ended', 'survey_time', 'questions', 'is_joined', 'id']
+        read_only_fields = ('is_ended', 'survey_time', 'id')
 
     def get_is_joined(self, obj):
         request = self.context.get('request')
@@ -73,21 +77,22 @@ class SurveySerializer(serializers.ModelSerializer):
         return survey
 
 
-class ResponseSubmitSerializer(serializers.ModelSerializer):
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
-    option = serializers.PrimaryKeyRelatedField(queryset=Option.objects.all())
-
-    class Meta:
-        model = Response
-        fields = ['user', 'question', 'text_answer', 'option']
-        extra_kwargs = {'user': {'write_only': True, 'required': False}}
+# class ResponseSubmitSerializer(serializers.ModelSerializer):
+#     question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+#     option = serializers.PrimaryKeyRelatedField(queryset=Option.objects.all())
+#
+#     class Meta:
+#         model = Response
+#         fields = ['user', 'question', 'text_answer', 'option']
+#         extra_kwargs = {'user': {'write_only': True, 'required': False}}
 
 
 class SurveyDetailsSerializer(serializers.ModelSerializer):
+    """This serializer use for getting survey details with question, options and answer"""
     questions = QuestionSerializer(many=True)
 
     class Meta:
         model = Survey
-        fields = ['title', 'survey_time', 'questions', 'ended_at']
+        fields = ['title', 'survey_time', 'questions', 'ended_at', 'is_ended']
 
 

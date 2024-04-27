@@ -1,5 +1,4 @@
-import datetime
-import pytz
+import math
 
 from django.utils import timezone
 from rest_framework.generics import ListCreateAPIView
@@ -9,24 +8,42 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from .models import Survey, ParticipatingUser, Response as SurveyResponse, Question, Option
-from .serializers import SurveySerializer, ResponseSubmitSerializer, SurveyDetailsSerializer
+from .serializers import SurveySerializer, SurveyDetailsSerializer
 
 
 class SurveyListView(ListCreateAPIView):
+    """This view responsible for implementing business logic for return list of surveys and create surveys.
+    List of surveys is returned with pagination."""
     serializer_class = SurveySerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        order_by = self.request.query_params.get('order_by', None)
-        if order_by:
-            return Survey.objects.all().order_by('created_at')
-        return Survey.objects.all()
+        order_by = self.request.query_params.get('order_by', "started")
+        start = int(self.request.query_params.get('start', 0))
+        end = int(self.request.query_params.get('end', 5))
+        if order_by == "created":
+            return Survey.objects.all().order_by('created_at')[start:end]
+        return Survey.objects.all()[start:end]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    def list(self, request, *args, **kwargs):
+        response = super(SurveyListView, self).list(request, *args, **kwargs)
+        total_data = Survey.objects.all().count()
+        total_pages = math.ceil(total_data / 5)
+        new_response = {
+            "survey": response.data,
+            "total_pages": total_pages
+        }
+        response.data = new_response
+        return response
+
 
 class SurveyParticipateView(APIView):
+    """This view implements business logic for returned a specefic survey also save response/answer of user. Based on
+    user already join the survey or not it return the survey if not join with get method user can join a survey.
+    with patch request a specific answer will save. PUT request will finally call when survey end."""
     permission_classes = (IsAuthenticated,)
 
     def get_object(self, **kwargs):
@@ -65,11 +82,6 @@ class SurveyParticipateView(APIView):
 
         if survey.ended_at < timezone.now():
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'message': 'Survey Finished'})
-
-        # body = request.data
-        # response_serializer = SurveyDetailsSerializer(data=body)
-        # response_serializer.is_valid(raise_exception=True)
-        # response_serializer.save(user=is_participating)
 
         is_participating.submitted = True
         is_participating.save()
