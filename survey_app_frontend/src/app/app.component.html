@@ -1,4 +1,10 @@
-<div class="container vh-100 p-3">
-    <h1>Home</h1>
+
+<div *ngIf="!is_loaded" class="overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="is_loaded" class="container vh-100 p-3">
     <router-outlet></router-outlet>
 </div>

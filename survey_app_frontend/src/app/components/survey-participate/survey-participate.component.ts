@@ -20,7 +20,11 @@ import {Router, ActivatedRoute} from "@angular/router";
 })
 export class SurveyParticipateComponent implements OnInit, OnDestroy {
     survey: SurveyDetails = {
-        title: "", survey_time: "", ended_at:"", questions: [{question: "", question_type: "", options: []}]
+        title: "",
+        survey_time: "",
+        ended_at: "",
+        is_ended: true,
+        questions: [{question: "", question_type: "", options: []}]
     };
 
     private answerSubject = new Subject()
@@ -28,34 +32,46 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
     currentAnswer: Answer[] = [];
 
     currentSurvey = 0
-    timer: any;
     timer_minute = 1
     timer_second = 60
 
+    timer: any;
     survey_id = null;
+    is_loaded = false
+    is_saved = false
 
-    constructor(private surveyService: SurveyService, private router:Router, private activatedRoute: ActivatedRoute) {
+    constructor(private surveyService: SurveyService, private router: Router, private activatedRoute: ActivatedRoute) {
+        // This debounce is applied for to restric API call on every change of user input. It only call API after user
+        // sit idle for 1.5 seconds
+        this.activatedRoute.params.subscribe(value => {
+            this.survey_id = value['id']
+        })
+
         this.answerSubject.pipe(
             debounceTime(1500)
         ).subscribe(value => {
-            this.surveyService.saveAnswer(this.currentAnswer, this.survey_id).subscribe(value => console.log(this.currentSurvey),
-                    error => console.log(error))
-            console.log(this.currentAnswer, this.survey)
+            this.surveyService.saveAnswer(this.currentAnswer, this.survey_id).subscribe(value => {
+                    this.is_saved = true
+                },
+                error => console.log(error))
             this.currentAnswer = []
         })
     }
 
     ngOnInit() {
-        this.activatedRoute.params.subscribe(value => this.survey_id=value['id'])
+        // On Initial stage collect the survey id from url and get survey from API call
+        this.is_loaded = false
         if (typeof window !== 'undefined' && window.localStorage) {
             this.timer_minute--;
             this.surveyService.getSurvey(this.survey_id).subscribe(value => {
                     this.survey = value
-                    this.timer_minute = Math.floor((new Date(value.ended_at).getTime() - new Date().getTime())/ (1000*60))
+                    if (!value.is_ended)
+                        this.timer_minute = Math.floor((new Date(value.ended_at).getTime() - new Date().getTime()) / (1000 * 60))
+                    this.is_loaded = true
                 },
                 error => {
                     console.log(error)
-                    this.router.navigate(['/survey'])
+                    this.router.navigate(['/'])
                 })
             this.startTimer()
         }
@@ -66,53 +82,70 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
     }
 
     gotToNext() {
+        // Slide to the next question
         if (this.currentSurvey < (this.survey.questions.length - 1))
             this.currentSurvey++
     }
 
     gotToPrevious() {
+        // Slide to the previous question
         if (this.currentSurvey > 0) this.currentSurvey--
     }
 
     startTimer(): void {
-        this.timer = setInterval(() => {
-            this.timer_second--;
-
-            if (this.timer_second == 0) {
-                // Time's up, go to the next question
-                this.timer_second = 60;
-                this.timer_minute--;
-            }
-            if (this.timer_minute < 0) {
-                clearInterval(this.timer)
-                this.timer_second = 0
-                this.timer_minute = 0
-            }
-        }, 1000);
+        // Start timer started by calling this function only if survey is not ended. This function called from ngOnInit
+        if (!this.survey.is_ended) {
+            this.timer = setInterval(() => {
+                this.timer_second--;
+                if (this.timer_second == 0) {
+                    // Time's up, go to the next question
+                    this.timer_second = 60;
+                    this.timer_minute--;
+                }
+                if (this.timer_minute < 0) {
+                    clearInterval(this.timer)
+                    this.timer_second = 0
+                    this.timer_minute = 0
+                    this.router.navigate(['/'])
+                }
+            }, 1000);
+        } else {
+            this.timer_minute = 0
+            this.timer_second = 0
+        }
     }
 
     onAddOption(event: any, question: any) {
-        if (!event.currentTarget.checked) {
-            this.answer = this.answer.filter(ans => ans.option != event.target.value)
-        } else {
-            this.answer.push({question: question, option: event.target.value})
+        // This method is save checkbox input change of user. When user idle for 1.5 sec the last changes of user will
+        // submitted and save by api call
+        if (!this.survey.is_ended) {
+            this.is_saved = false
+            if (!event.currentTarget.checked) {
+                this.answer = this.answer.filter(ans => ans.option != event.target.value)
+            } else {
+                this.answer.push({question: question, option: event.target.value})
+            }
+            this.survey.questions[this.currentSurvey].options.map(op => op.id == event.target.value ? op.answer = event.currentTarget.checked : null)
+            this.currentAnswer.push({question: question, option: event.target.value})
+            this.answerSubject.next(this.answer)
         }
-        this.survey.questions[this.currentSurvey].options.map(op => op.id == event.target.value ? op.answer = event.currentTarget.checked: null)
-        this.currentAnswer.push({question: question, option: event.target.value})
-        this.answerSubject.next(this.answer)
     }
 
     onChangeAnswer(event: any, question: any, text_answer: boolean = false) {
-        let newAnswer: Answer;
-        if (text_answer) {
-            newAnswer = {question: question, text_answer: event.target.value}
-            this.survey.questions[this.currentSurvey].text_answer = event.target.value
-        } else {
-            newAnswer = {question: question, option: event.target.value}
-            this.survey.questions[this.currentSurvey].options.map(op => op.id == event.target.value ? op.answer = true : op.answer = false)
+        //This method is responsible for save new input of text field and radio buttons.
+        if (!this.survey.is_ended) {
+            this.is_saved = false
+            let newAnswer: Answer;
+            if (text_answer) {
+                newAnswer = {question: question, text_answer: event.target.value}
+                this.survey.questions[this.currentSurvey].text_answer = event.target.value
+            } else {
+                newAnswer = {question: question, option: event.target.value}
+                this.survey.questions[this.currentSurvey].options.map(op => op.id == event.target.value ? op.answer = true : op.answer = false)
+            }
+            this.updateAnswer(newAnswer)
+            this.currentAnswer = [newAnswer]
         }
-        this.updateAnswer(newAnswer)
-        this.currentAnswer = [newAnswer]
     }
 
     updateAnswer(newAnswer: any) {
@@ -123,9 +156,22 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
         this.answerSubject.next(this.answer)
     }
 
-    onSubmit(){
-        this.surveyService.submitSurvey({submit:true}, this.survey_id).subscribe(value => {this.router.navigate(['/survey'])},
-                error => {console.log(error)})
+    onSubmit() {
+        //once user press submit button this function is activated and submit the final answer.
+        if (!this.survey.is_ended) {
+            this.surveyService.submitSurvey({submit: true}, this.survey_id).subscribe(value => {
+                    this.router.navigate(['/survey'])
+                },
+                error => {
+                    console.log(error)
+                })
+        }
+    }
+
+    logout(){
+        // This method make user logout by remove token from localstorage
+        localStorage.removeItem('token')
+        this.router.navigate(['/login'])
     }
 
     protected readonly parseInt = parseInt;

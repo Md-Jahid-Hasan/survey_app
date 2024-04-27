@@ -1,8 +1,18 @@
 <div class="d-flex justify-content-end mb-3">
-        <span class="me-2 pt-2">Sort by:</span>
-        <button class="btn btn-secondary me-2">Created At</button>
-        <button class="btn btn-secondary">Started At</button>
-    </div>
+    <button class="btn btn-primary" (click)="logout()">
+        Logout
+    </button>
+</div>
+
+<div class="d-flex justify-content-end mb-3">
+    <span class="me-2 pt-2">Sort by:</span>
+    <button class="btn btn-secondary me-2" (click)="surveyOrder('created')" [disabled]="order_by==='created'"
+    >Created At
+    </button>
+    <button class="btn btn-secondary" (click)="surveyOrder('started')"
+            [disabled]="order_by==='started'">Started At
+    </button>
+</div>
 <table class="table table-bordered table-hover table-striped">
     <thead>
     <tr>
@@ -19,32 +29,26 @@
         <td>{{ survey.started_at }}</td>
         <td>{{ parseInt(survey.survey_time) }} minutes</td>
         <td>
-            <button class="btn btn-primary" [disabled]="survey.is_ended">{{ survey.is_joined ? "Enter" : "Join" }}
-            </button>
+            <a [ngStyle]="{'pointer-events': (survey.is_ended && !survey.is_joined) ? 'none' : 'auto'}"
+               routerLink="/participate/{{survey.id}}">
+                <button class="btn btn-primary" [disabled]="survey.is_ended">{{ survey.is_joined ? "Enter" : "Join" }}
+                </button>
+            </a>
         </td>
     </tr>
-    <!-- Add more rows as needed -->
     </tbody>
 </table>
+
 <nav class="d-flex justify-content-center">
     <ul class="pagination">
-        <li class="page-item" >
-            <button class="page-link">Previous</button>
+        <li class="page-item">
+            <button class="page-link" [disabled]="currentPage==1" (click)="previousPage()">Previous</button>
+        </li>
+        <li class="page-item border">
+            <button disabled class="page-link">{{ currentPage }} of {{ total_pages }}</button>
         </li>
         <li class="page-item">
-            <button class="page-link">1</button>
-        </li>
-        <li class="page-item">
-            <button class="page-link">1</button>
-        </li>
-        <li class="page-item">
-            <button class="page-link">1</button>
-        </li>
-        <li class="page-item">
-            <button class="page-link">1</button>
-        </li>
-        <li class="page-item">
-            <button class="page-link">Next</button>
+            <button class="page-link" [disabled]="currentPage==total_pages" (click)="nextPage()">Next</button>
         </li>
     </ul>
 </nav>

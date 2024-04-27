@@ -23,6 +23,7 @@ export class UsersComponent {
     constructor(private userService:UsersService, private router: Router) {}
 
     onSubmit() {
+        // This function responsible for user creation.
         if (this.user_details.password !== this.user_details.confirm_password)
             alert("password dont match")
         else if (this.user_details.name === "" || this.user_details.email == "" || this.user_details.password === "" ||

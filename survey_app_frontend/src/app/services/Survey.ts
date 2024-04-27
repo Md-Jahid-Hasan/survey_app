@@ -1,4 +1,5 @@
 export interface SurveyList {
+    id?: number,
     title: string,
     started_at: string,
     ended_at: string,
@@ -12,6 +13,7 @@ export interface SurveyDetails {
     title: string,
     survey_time: string,
     ended_at: string,
+    is_ended: boolean,
     questions: Question[]
 }
 

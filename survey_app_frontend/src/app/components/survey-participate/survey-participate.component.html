@@ -1,17 +1,31 @@
-<!-- Timer and buttons row -->
-<div class="shadow-sm p-3 mb-5 bg-body-tertiary rounded">
-    <div>{{ survey.title }}</div>
+<div *ngIf="!is_loaded" class="overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
 
-    <div class="row mb-4 d-flex justify-content-between">
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" (click)="logout()">
+        Logout
+    </button>
+</div>
+
+<div *ngIf="is_loaded" class="shadow-sm p-3 mb-5 bg-body-tertiary rounded">
+    <div class="text-body-secondary">{{ survey.title }}</div>
+
+    <div *ngIf="!survey.is_ended" class="d-flex justify-content-end mb-3">
+        <span [ngClass]="is_saved ?'text-bg-success' :'text-bg-danger' "
+              class="badge rounded-pill">{{ is_saved ? 'Saved' : 'Draft' }}</span>
+    </div>
+
+    <div class="row mb-4 ms-2 d-flex justify-content-between">
         <div
             [ngClass]="timer_minute > ((parseInt(survey.survey_time)/3)*2) ? 'text-bg-success' :
                        timer_minute > (parseInt(survey.survey_time)/3) ? 'text-bg-warning' : 'text-bg-danger'"
             class="col-md-1 badge">
-            <!-- Timer (left corner) -->
-            <span id="timer">{{ timer_minute }}:{{ timer_second }}</span>
+            <span class="fw-bold fs-6 font-monospace">{{ timer_minute }}:{{ timer_second }}</span>
         </div>
         <div class="col-md-4 text-end">
-            <!-- Buttons with left and right arrows (right corner) -->
             <button class="btn btn-primary me-2" (click)="gotToPrevious()">
                 <i class="bi bi-arrow-left"></i> Previous
             </button>
@@ -20,23 +34,22 @@
             </button>
         </div>
     </div>
-    <!-- Form inputs -->
 
     <form>
         <div class="mb-3">
-            <label class="form-label">{{ survey.questions[currentSurvey].question }}</label>
+            <label class="form-label fw-bold">{{ survey.questions[currentSurvey].question }}</label>
         </div>
 
         <div *ngIf="survey.questions[currentSurvey].question_type==='TF'" class="mb-3">
             <textarea type="text" class="form-control" id="answer" placeholder="Enter text"
-                      [value]="survey.questions[currentSurvey].text_answer"
+                      [value]="survey.questions[currentSurvey].text_answer" [readOnly]="survey.is_ended"
                       (input)="onChangeAnswer($event, survey.questions[currentSurvey].id, true)"></textarea>
         </div>
 
         <div *ngIf="survey.questions[currentSurvey].question_type==='CB'" class="mb-3">
             <div *ngFor="let option of survey.questions[currentSurvey].options" class="form-check">
                 <input class="form-check-input" type="checkbox" id="checkboxInput" [value]="option.id"
-                       [checked]="option.answer"
+                       [checked]="option.answer" [readOnly]="survey.is_ended"
                        (change)="onAddOption($event, survey.questions[currentSurvey].id)">
                 <label class="form-check-label" for="checkboxInput">{{ option.option_text }}</label>
             </div>
@@ -44,30 +57,29 @@
 
         <div *ngIf="survey.questions[currentSurvey].question_type==='RF'" class="mb-3">
             <div *ngFor="let option of survey.questions[currentSurvey].options" class="form-check">
-                <input class="form-check-input" type="radio" name="xyz"
+                <input class="form-check-input" type="radio" [readOnly]="survey.is_ended"
                        (change)="onChangeAnswer($event, survey.questions[currentSurvey].id)"
                        [value]="option.id" [checked]="option.answer">
                 <label class="form-check-label">{{ option.option_text }}</label>
             </div>
         </div>
-        <!-- Add more form fields as needed -->
     </form>
 
-      <div class="text-end mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <div class="text-end mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal" *ngIf="!survey.is_ended">
         <button type="submit" class="btn btn-info">Submit</button>
     </div>
 
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-body">
-        Once you submit you can not able to answer again!
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-success" (click)="onSubmit()">Save changes</button>
-      </div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    Once you submit you can not able to answer again!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" (click)="onSubmit()">Save changes</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 </div>

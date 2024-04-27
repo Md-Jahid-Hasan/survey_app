@@ -2,12 +2,10 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {Answer, SurveyDetails, SurveyList} from "./Survey";
-import {stringify} from "node:querystring";
 
 let httpOption = {
     headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${localStorage.getItem('rb_token')}`
     })
 }
 
@@ -20,30 +18,26 @@ export class SurveyService {
 
     constructor(private http:HttpClient) {}
 
-    getAllSurvey(): Observable<SurveyList[]> {
-        if (!httpOption.headers.has('Authorization'))
-            httpOption.headers = httpOption.headers.append('Authorization', `Bearer ${localStorage.getItem('token')}`)
-        return this.http.get<SurveyList[]>(this.survey_list_api, httpOption)
+    getAllSurvey(order:any= {}): Observable<any> {
+        // Getting all survey as list
+        return this.http.get<any>(this.survey_list_api, {params: order, headers:httpOption.headers})
     }
 
     getSurvey(id:any): Observable<SurveyDetails>{
-        this.survey_api = this.survey_api.replace("survey_id", id.toString())
-        if (!httpOption.headers.has('Authorization'))
-            httpOption.headers = httpOption.headers.append('Authorization', `Bearer ${localStorage.getItem('token')}`)
-        return this.http.get<SurveyDetails>(this.survey_api, httpOption)
+        //get specific survey based on id
+        const api = this.survey_api.replace("survey_id", id.toString())
+        return this.http.get<SurveyDetails>(api, httpOption)
     }
 
     saveAnswer(answer: Answer[], id:any): Observable<any>{
-        this.survey_api = this.survey_api.replace("survey_id", id.toString())
-        if (!httpOption.headers.has('Authorization'))
-            httpOption.headers = httpOption.headers.append('Authorization', `Bearer ${localStorage.getItem('token')}`)
-        return this.http.patch<any>(this.survey_api,answer, httpOption)
+        //submit answer of specific survey based on id and passed answer of question as body
+        const api = this.survey_api.replace("survey_id", id.toString())
+        return this.http.patch<any>(api,answer, httpOption)
     }
 
     submitSurvey(survey: any, id:any): Observable<any>{
-        this.survey_api = this.survey_api.replace("survey_id", id.toString())
-        if (!httpOption.headers.has('Authorization'))
-            httpOption.headers = httpOption.headers.append('Authorization', `Bearer ${localStorage.getItem('token')}`)
-        return this.http.put<any>(this.survey_api, survey, httpOption)
+        // Finally submit the answer
+        const api = this.survey_api.replace("survey_id", id.toString())
+        return this.http.put<any>(api, survey, httpOption)
     }
 }
