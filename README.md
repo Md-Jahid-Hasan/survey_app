@@ -50,10 +50,19 @@ framework. To install this project it is a very easy and simple steps we need to
    ```
    npm install
    ```
-   This should install all dependency of project.
+   This should install all dependencies of the project.
 3. Now run this command to deploy project on localhost.
    ```
    ng server
+
    ```
 
+## Overview
+![Screenshot from 2024-04-28 21-12-15](https://github.com/Md-Jahid-Hasan/survey_app/assets/58201576/bc0a4de0-ba27-463d-81e9-b8d6dfdf17bf)
+
+This is a page for viewing the list of survey. Red indicates that survey end. In the right most button if the text is **Join** then you already join the survey and if the text is **Enter** you don't join in that survey.
+
+![Untitled (1)](https://github.com/Md-Jahid-Hasan/survey_app/assets/58201576/5c56512b-84e1-421d-8a2f-26ef55b75ae0)
+
+In the left side there is a timer and based on how much time left it change the color. In the right side ther is **Logout** button and the a small button indicate **save** that remark that my current is saved in database. If it indicate **draft** and red color then it remark thak my current change still not saved in database. And then **Previous** and **Next** button for switch question and submit button.
 
