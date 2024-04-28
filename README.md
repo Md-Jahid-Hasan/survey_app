@@ -12,17 +12,17 @@ and dependency follow below instruction,
 1. Python3 and Pip and Venv Must be installed in your system
 2. Activate the Venv by this command
     ```
-    source bin/activate
+    source [env_name]/bin/activate
     ```
 3. Create a database in postgresql, named **survey_app**.
 4. Create a **.env** file and add those two lines ->
    ```
-   POSTGRES_USER=postgres
-   POSTGRES_PASSWORD=postgres
+   POSTGRES_USER=your_database_user
+   POSTGRES_PASSWORD=user_database_password
    ```
 5. Run the command below to install all the packages
    ```
-   pip install - r requirements.txt
+   pip install -r requirements.txt
    ```
    
 6. Now go to project directory and run those two commands to create database
@@ -53,7 +53,7 @@ framework. To install this project it is a very easy and simple steps we need to
    This should install all dependencies of the project.
 3. Now run this command to deploy project on localhost.
    ```
-   ng server
+   ng serve
 
    ```
 
