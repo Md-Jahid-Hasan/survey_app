@@ -23,6 +23,7 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
         title: "",
         survey_time: "",
         ended_at: "",
+        is_submitted: true,
         is_ended: true,
         questions: [{question: "", question_type: "", options: []}]
     };
@@ -68,12 +69,12 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
                     if (!value.is_ended)
                         this.timer_minute = Math.floor((new Date(value.ended_at).getTime() - new Date().getTime()) / (1000 * 60))
                     this.is_loaded = true
+                    this.startTimer()
                 },
                 error => {
                     console.log(error)
                     this.router.navigate(['/'])
                 })
-            this.startTimer()
         }
     }
 
@@ -94,7 +95,7 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
 
     startTimer(): void {
         // Start timer started by calling this function only if survey is not ended. This function called from ngOnInit
-        if (!this.survey.is_ended) {
+        if (!this.survey.is_ended || !this.survey.is_submitted) {
             this.timer = setInterval(() => {
                 this.timer_second--;
                 if (this.timer_second == 0) {
@@ -118,7 +119,7 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
     onAddOption(event: any, question: any) {
         // This method is save checkbox input change of user. When user idle for 1.5 sec the last changes of user will
         // submitted and save by api call
-        if (!this.survey.is_ended) {
+        if (!this.survey.is_ended || !this.survey.is_submitted) {
             this.is_saved = false
             if (!event.currentTarget.checked) {
                 this.answer = this.answer.filter(ans => ans.option != event.target.value)
@@ -133,7 +134,7 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
 
     onChangeAnswer(event: any, question: any, text_answer: boolean = false) {
         //This method is responsible for save new input of text field and radio buttons.
-        if (!this.survey.is_ended) {
+        if (!this.survey.is_ended || !this.survey.is_submitted) {
             this.is_saved = false
             let newAnswer: Answer;
             if (text_answer) {
@@ -158,7 +159,7 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
 
     onSubmit() {
         //once user press submit button this function is activated and submit the final answer.
-        if (!this.survey.is_ended) {
+        if (!this.survey.is_ended || !this.survey.is_submitted) {
             this.surveyService.submitSurvey({submit: true}, this.survey_id).subscribe(value => {
                     this.router.navigate(['/'])
                 },
@@ -168,7 +169,7 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
         }
     }
 
-    logout(){
+    logout() {
         // This method make user logout by remove token from localstorage
         localStorage.removeItem('token')
         this.router.navigate(['/login'])

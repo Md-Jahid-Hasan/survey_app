@@ -90,9 +90,17 @@ class SurveySerializer(serializers.ModelSerializer):
 class SurveyDetailsSerializer(serializers.ModelSerializer):
     """This serializer use for getting survey details with question, options and answer"""
     questions = QuestionSerializer(many=True)
+    is_submitted = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Survey
-        fields = ['title', 'survey_time', 'questions', 'ended_at', 'is_ended']
+        fields = ['title', 'survey_time', 'questions', 'ended_at', 'is_ended', 'is_submitted']
+
+    def get_is_submitted(self, obj):
+        user = self.context['request'].user
+        user_participation = obj.participatinguser_set.filter(user=user)
+        if user_participation.exists():
+            return user_participation.first().submitted
+        return False
 
 

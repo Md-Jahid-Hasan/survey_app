@@ -49,7 +49,7 @@ class SurveyParticipateView(APIView):
     def get_object(self, **kwargs):
         lookup_field = kwargs.get('id')
         try:
-            return Survey.objects.get(id=lookup_field)
+            return Survey.objects.prefetch_related('questions').get(id=lookup_field)
         except Survey.DoesNotExist:
             return None
 

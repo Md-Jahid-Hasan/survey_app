@@ -4,8 +4,19 @@ from .models import Survey, Question, Option, ParticipatingUser, Response
 # Register your models here.
 
 admin.site.register(Survey)
-admin.site.register(ParticipatingUser)
 admin.site.register(Response)
+
+
+class ResponseInline(admin.TabularInline):
+    model = Response
+    readonly_fields = ['question']
+
+
+class ParticipatingUserModelAdmin(admin.ModelAdmin):
+    inlines = [ResponseInline]
+
+
+admin.site.register(ParticipatingUser, ParticipatingUserModelAdmin)
 
 
 class QuestionInline(admin.TabularInline):

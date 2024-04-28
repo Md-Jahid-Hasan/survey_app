@@ -14,6 +14,7 @@ export interface SurveyDetails {
     survey_time: string,
     ended_at: string,
     is_ended: boolean,
+    is_submitted: boolean,
     questions: Question[]
 }
 

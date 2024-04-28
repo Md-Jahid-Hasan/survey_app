@@ -13,7 +13,7 @@
 <div *ngIf="is_loaded" class="shadow-sm p-3 mb-5 bg-body-tertiary rounded">
     <div class="text-body-secondary">{{ survey.title }}</div>
 
-    <div *ngIf="!survey.is_ended" class="d-flex justify-content-end mb-3">
+    <div *ngIf="!survey.is_ended && !survey.is_submitted" class="d-flex justify-content-end mb-3">
         <span [ngClass]="is_saved ?'text-bg-success' :'text-bg-danger' "
               class="badge rounded-pill">{{ is_saved ? 'Saved' : 'Draft' }}</span>
     </div>
@@ -42,14 +42,14 @@
 
         <div *ngIf="survey.questions[currentSurvey].question_type==='TF'" class="mb-3">
             <textarea type="text" class="form-control" id="answer" placeholder="Enter text"
-                      [value]="survey.questions[currentSurvey].text_answer" [readOnly]="survey.is_ended"
+                      [value]="survey.questions[currentSurvey].text_answer" [readOnly]="survey.is_ended || survey.is_submitted"
                       (input)="onChangeAnswer($event, survey.questions[currentSurvey].id, true)"></textarea>
         </div>
 
         <div *ngIf="survey.questions[currentSurvey].question_type==='CB'" class="mb-3">
             <div *ngFor="let option of survey.questions[currentSurvey].options" class="form-check">
                 <input class="form-check-input" type="checkbox" id="checkboxInput" [value]="option.id"
-                       [checked]="option.answer" [readOnly]="survey.is_ended"
+                       [checked]="option.answer" [readOnly]="survey.is_ended || survey.is_submitted"
                        (change)="onAddOption($event, survey.questions[currentSurvey].id)">
                 <label class="form-check-label" for="checkboxInput">{{ option.option_text }}</label>
             </div>
@@ -57,7 +57,7 @@
 
         <div *ngIf="survey.questions[currentSurvey].question_type==='RF'" class="mb-3">
             <div *ngFor="let option of survey.questions[currentSurvey].options" class="form-check">
-                <input class="form-check-input" type="radio" [readOnly]="survey.is_ended"
+                <input class="form-check-input" type="radio" [readOnly]="survey.is_ended || survey.is_submitted"
                        (change)="onChangeAnswer($event, survey.questions[currentSurvey].id)"
                        [value]="option.id" [checked]="option.answer">
                 <label class="form-check-label">{{ option.option_text }}</label>
@@ -65,11 +65,12 @@
         </div>
     </form>
 
-    <div class="text-end mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal" *ngIf="!survey.is_ended">
+    <div class="text-end mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal"
+         *ngIf="!survey.is_ended && !survey.is_submitted">
         <button type="submit" class="btn btn-info">Submit</button>
     </div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
@@ -77,7 +78,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" (click)="onSubmit()">Save changes</button>
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="onSubmit()"
+                    >Save changes</button>
                 </div>
             </div>
         </div>
