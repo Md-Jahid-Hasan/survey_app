@@ -30,6 +30,7 @@ export class AuthGuardService implements CanActivate {
                 const isExpired = decodeToken && decodeToken.exp ? decodeToken.exp < Date.now() / 1000 : false
 
                 if (isExpired) {
+                    // Can be implement to refresh access token logic here
                     localStorage.removeItem('token')
                     this.router.navigate(['/login'])
                     return false

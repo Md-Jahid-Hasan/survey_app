@@ -25,7 +25,7 @@ class Survey(models.Model):
                                           through=ParticipatingUser)
 
     class Meta:
-        ordering = ['started_at']
+        ordering = ['-started_at']
 
     @property
     def is_ended(self):

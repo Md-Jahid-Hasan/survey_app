@@ -45,7 +45,7 @@ export class SurveyListComponent implements OnInit {
         // Get the survey list on different oder and with pagination
         this.order_by = order
         if (typeof window !== 'undefined' && window.localStorage) {
-            this.surveyService.getAllSurvey({order:order}).subscribe(surveys => this.surveys = surveys,
+            this.surveyService.getAllSurvey({order:order}).subscribe(surveys => this.surveys = surveys.survey,
                 error => console.log(error))
         }
     }

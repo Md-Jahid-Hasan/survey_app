@@ -18,7 +18,7 @@ class SurveyListView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        order_by = self.request.query_params.get('order_by', "started")
+        order_by = self.request.query_params.get('order', "started")
         start = int(self.request.query_params.get('start', 0))
         end = int(self.request.query_params.get('end', 5))
         if order_by == "created":

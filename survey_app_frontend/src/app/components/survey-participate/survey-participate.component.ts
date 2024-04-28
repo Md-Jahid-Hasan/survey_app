@@ -160,7 +160,7 @@ export class SurveyParticipateComponent implements OnInit, OnDestroy {
         //once user press submit button this function is activated and submit the final answer.
         if (!this.survey.is_ended) {
             this.surveyService.submitSurvey({submit: true}, this.survey_id).subscribe(value => {
-                    this.router.navigate(['/survey'])
+                    this.router.navigate(['/'])
                 },
                 error => {
                     console.log(error)
